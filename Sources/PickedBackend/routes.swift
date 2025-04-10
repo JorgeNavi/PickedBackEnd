@@ -9,6 +9,10 @@ app.get { req async in
     app.get("hello") { req async -> String in
         "Hello, world!"
     }
+    
+    let userController = UserController()
+    app.post("register", use: userController.register)
+    app.post("login", use: userController.login)
 
     //try app.register(collection: TodoController())
 }
