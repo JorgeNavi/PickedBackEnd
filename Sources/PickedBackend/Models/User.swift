@@ -1,6 +1,7 @@
 import Fluent
 import Vapor
 
+//MARK: Enum con las distintas opciones para el rol de usuario
 enum UserRole: String, Codable, Content {
     case consumer
     case restaurant
@@ -8,6 +9,7 @@ enum UserRole: String, Codable, Content {
 }
 
 
+//MARK: Modelo de User con sus atributos para la BBDD
 final class User: Model, Content, @unchecked Sendable {
     
     static let schema: String = "users"

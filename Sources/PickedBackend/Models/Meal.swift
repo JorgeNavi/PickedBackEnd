@@ -2,7 +2,7 @@
 import Fluent
 import Vapor
 
-
+//MARK: Modelo de Meal con sus atributos para la BBDD
 final class Meal: Model, Content, @unchecked Sendable {
     
     static let schema = "meals"

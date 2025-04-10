@@ -1,6 +1,7 @@
 import Fluent
 import Vapor
 
+//MARK: Clase que establece las rutas del proyecto
 func routes(_ app: Application) throws {
 app.get { req async in
         "It works!"

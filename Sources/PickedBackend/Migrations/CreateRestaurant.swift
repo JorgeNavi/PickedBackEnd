@@ -1,5 +1,6 @@
 import Fluent
 
+//MARK: Migración de la tabla "restaurant" a la BBDD
 struct CreateRestaurant: AsyncMigration {
     func prepare(on database: any Database) async throws {
         try await database.schema(Restaurant.schema)

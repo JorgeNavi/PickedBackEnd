@@ -4,7 +4,7 @@ import FluentPostgresDriver
 import Vapor
 import JWT
 
-// configures your application
+//MARK: clase de configuración del proyecto
 public func configure(_ app: Application) async throws {
     // uncomment to serve files from /Public folder
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
@@ -28,6 +28,6 @@ public func configure(_ app: Application) async throws {
 
 
 
-    // register routes
+    //register routes
     try routes(app)
 }
