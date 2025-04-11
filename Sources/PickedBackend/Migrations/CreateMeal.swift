@@ -10,6 +10,7 @@ struct CreateMeal: AsyncMigration {
             .field("photo", .string, .required)
             .field("price", .float, .required)
             .field("units", .int, .required)
+            .field("food_type", .string, .required)
             .field("created_at", .date)
             .field("updated_at", .date)
             .field("created_by", .uuid, .references("users", "id"))

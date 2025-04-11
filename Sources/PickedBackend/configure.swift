@@ -26,8 +26,8 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateRestaurant())
     app.migrations.add(CreateMeal())
 
-
-
+    //Se ejecutan las migraciones de forma automática si no se hicieron antes
+    try await app.autoMigrate()
     //register routes
     try routes(app)
 }

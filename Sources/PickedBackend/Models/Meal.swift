@@ -2,6 +2,18 @@
 import Fluent
 import Vapor
 
+enum FoodType: String, Codable, Content {
+    case american
+    case asian
+    case indian
+    case italian
+    case mediterranean
+    case mexican
+    case vegan
+    case vegetarian
+    case other
+}
+
 //MARK: Modelo de Meal con sus atributos para la BBDD
 final class Meal: Model, Content, @unchecked Sendable {
     
@@ -24,6 +36,9 @@ final class Meal: Model, Content, @unchecked Sendable {
     
     @Field(key: "units")
     var units: Int
+    
+    @Field(key: "food_type")
+    var type: FoodType
     
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
