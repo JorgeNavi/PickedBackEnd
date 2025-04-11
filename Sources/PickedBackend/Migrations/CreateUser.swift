@@ -1,7 +1,7 @@
 import Fluent
 
 
-//MARK: Migración de la tabla "user" a la BBDD
+//MARK: Migración de la tabla "users" a la BBDD
 struct CreateUser: AsyncMigration {
     func prepare(on database: any Database) async throws {
         try await database.schema(User.schema)

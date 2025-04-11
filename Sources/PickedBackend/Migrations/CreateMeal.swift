@@ -1,6 +1,6 @@
 import Fluent
 
-//MARK: Migración de la tabla "meal" a la BBDD
+//MARK: Migración de la tabla "meals" a la BBDD
 struct CreateMeal: AsyncMigration {
     func prepare(on database: any Database) async throws {
         try await database.schema(Meal.schema)
