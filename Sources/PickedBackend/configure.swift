@@ -22,9 +22,11 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
 
+    //La orden de llevar a cabo las migraciones a la BBDD y que se creen las tablas
     app.migrations.add(CreateUser())
     app.migrations.add(CreateRestaurant())
     app.migrations.add(CreateMeal())
+    app.migrations.add(CreatePurchase())
 
     //Se ejecutan las migraciones de forma automática si no se hicieron antes
     try await app.autoMigrate()
