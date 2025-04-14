@@ -10,7 +10,7 @@ enum UserRole: String, Codable, Content {
 
 
 //MARK: Modelo de User con sus atributos para la BBDD
-final class User: Model, Content, @unchecked Sendable {
+final class User: Model, Content, Authenticatable, @unchecked Sendable {
     
     static let schema: String = "users"
     

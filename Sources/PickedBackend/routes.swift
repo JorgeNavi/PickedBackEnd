@@ -12,8 +12,11 @@ app.get { req async in
     }
     
     let userController = UserController()
-    app.post("register", use: userController.register)
+    app.post("register-consumer", use: userController.consumerRegister)
     app.post("login", use: userController.login)
+    
+    let restaurantController = RestaurantController()
+    app.post("register-restaurant", use: restaurantController.restaurantRegister)
 
     //try app.register(collection: TodoController())
 }
