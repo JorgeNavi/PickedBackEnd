@@ -19,7 +19,7 @@ struct UserLoginResponseDTO: Content {
 extension User {
     func toLoginResponseDTO(token: String) throws -> UserLoginResponseDTO {
         return try UserLoginResponseDTO(
-            id: requireID(),     // Asegura que el ID no es nil (lanza error si lo es)
+            id: requireID(),
             name: name,
             email: email,
             role: role,

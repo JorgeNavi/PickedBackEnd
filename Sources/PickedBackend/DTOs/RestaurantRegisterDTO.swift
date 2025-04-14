@@ -2,13 +2,13 @@ import Vapor
 
 // MARK: DTO para el registro de usuario tipo restaurante
 struct RestaurantRegisterDTO: Content {
-    // Datos del usuario
+    //Datos del usuario
     let name: String
     let email: String
     let password: String
     let role: UserRole
 
-    // Datos del restaurante
+    //Datos del restaurante
     let restaurantName: String
     let info: String
     let photo: String
