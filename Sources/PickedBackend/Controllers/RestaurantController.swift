@@ -21,8 +21,9 @@ struct RestaurantController: RouteCollection {
                 throw Abort(.conflict, reason: "Error: email already exists.")
             }
             
-            // Hasheamos la contraseña
+            //Hasheamos la contraseña
             let hashedPassword = try Bcrypt.hash(data.password)
+            
             
             //Creamos el usuario con rol restaurant
             let user = User(
@@ -35,11 +36,14 @@ struct RestaurantController: RouteCollection {
             //Guardamos el usuario
             try await user.save(on: req.db)
             
+            //Usamos el método de manejo de imagenes
+            let photoURL = try await req.saveImageAndReturnURL(from: "photo")
+            
             //Creamos el restaurante vinculado al usuario
             let restaurant = Restaurant(
                 name: data.restaurantName,
                 info: data.info,
-                photo: data.photo,
+                photo: photoURL,
                 address: data.address,
                 country: data.country,
                 city: data.city,
