@@ -6,9 +6,13 @@ struct RestaurantController: RouteCollection {
     
     //Método boot en el que se incluyen las rutas de las funcionalidades
     func boot(routes: any RoutesBuilder) throws {
-        routes.post("register-restaurant", use: restaurantRegister)
+        let restaurantRoutes = routes.grouped("restaurants")
+        restaurantRoutes.post("register", use: restaurantRegister)
+        restaurantRoutes.post("nearby", use: getNearbyRestaurants)
+        restaurantRoutes.get("all", use: getAllRestaurants)
     }
     
+    //Método para registrar restaurante en la BBDD
     func restaurantRegister(req: Request) async throws -> UserLoginResponseDTO {
         do {
             //Decodificamos el DTO completo con datos de User + Restaurant
@@ -74,4 +78,46 @@ struct RestaurantController: RouteCollection {
             throw Abort(.internalServerError, reason: "Error trying to register restaurant.")
         }
     }
+    
+    //Método para ver los restaurantes en la zona del consumidor
+    func getNearbyRestaurants(req: Request) async throws -> [Restaurant] {
+        //Decodificamos la localización del consumidor desde el JSON
+        let location = try req.content.decode(LocationDTO.self)
+        
+        //Obtenemos todos los restaurantes
+        let allRestaurants = try await Restaurant.query(on: req.db).all()
+        
+        //Filtramos solo los que están a 10km o menos usando Haversine
+        let nearbyRestaurants = allRestaurants.filter { restaurant in
+            let distance = haversineDistance(
+                lat1: location.latitude,
+                lon1: location.longitude,
+                lat2: restaurant.latitude,
+                lon2: restaurant.longitude
+            )
+            return distance <= 10 //KM
+        }
+        
+        return nearbyRestaurants
+    }
+    
+    //Método para que podamos comprobar todos los restaurantes
+    func getAllRestaurants(req: Request) async throws -> [Restaurant] {
+        try await Restaurant.query(on: req.db).all()
+    }
+}
+
+//Método Haversine para filtrar la distancia del consumidor con 10km de radio para recibir restaurantes
+func haversineDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {
+    let earthRadius = 6371.0
+    let dLat = (lat2 - lat1) * .pi / 180
+    let dLon = (lon2 - lon1) * .pi / 180
+    
+    let a = pow(sin(dLat / 2), 2)
+          + cos(lat1 * .pi / 180)
+          * cos(lat2 * .pi / 180)
+          * pow(sin(dLon / 2), 2)
+    
+    let c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return earthRadius * c
 }

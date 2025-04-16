@@ -6,8 +6,9 @@ struct UserController: RouteCollection {
     
     //Método boot en el que se incluyen las rutas de las funcionalidades
     func boot(routes: any RoutesBuilder) throws {
-        routes.post("register-consumer", use: consumerRegister)
-        routes.post("login", use: login)
+        let userRoutes = routes.grouped("auth")
+        userRoutes.post("register-consumer", use: consumerRegister)
+        userRoutes.post("login", use: login)
     }
 
     //Método que se llama al hacer registro
