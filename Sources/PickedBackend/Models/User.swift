@@ -29,6 +29,9 @@ final class User: Model, Content, Authenticatable, @unchecked Sendable {
     @Field(key: "role")
     var role: UserRole
     
+    @OptionalChild(for: \.$user)
+    var restaurant: Restaurant?
+    
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     

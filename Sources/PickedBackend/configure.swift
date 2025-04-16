@@ -23,6 +23,7 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
     
+    //Para que permita más tamaño en los post (como en las fotos)
     app.routes.defaultMaxBodySize = "10mb"
 
     //La orden de llevar a cabo las migraciones a la BBDD y que se creen las tablas

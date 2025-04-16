@@ -51,6 +51,9 @@ final class Restaurant: Model, Content, @unchecked Sendable {
     @Parent(key: "user_id")
     var user: User
     
+    @Children(for: \.$restaurant)
+    var meals: [Meal]
+    
     init() {}
 
     init(id: UUID? = nil, name: String, info: String, photo: String, address: String, country: String, city: String, zipCode: String, latitude: Double, longitude: Double, userID: UUID) {
@@ -65,5 +68,27 @@ final class Restaurant: Model, Content, @unchecked Sendable {
         self.latitude = latitude
         self.longitude = longitude
         self.$user.id = userID
+    }
+}
+
+//MARK: Extension de restaurante para el dto de detalle añadiendo los platos asignados
+extension Restaurant {
+    func toDetailDTO(meals: [Meal]) -> RestaurantDetailDTO {
+        let mealDTOs = meals.map { meal in
+            MealRestaurantDTO(id: meal.id!, name: meal.name, price: meal.price, photo: meal.photo)
+        }
+        return RestaurantDetailDTO(
+            id: self.id!,
+            name: self.name,
+            info: self.info,
+            photo: self.photo,
+            address: self.address,
+            country: self.country,
+            city: self.city,
+            zipCode: self.zipCode,
+            latitude: self.latitude,
+            longitude: self.longitude,
+            meals: mealDTOs
+        )
     }
 }

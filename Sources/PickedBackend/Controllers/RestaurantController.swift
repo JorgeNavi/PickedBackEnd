@@ -1,15 +1,19 @@
 import Vapor
 import Fluent
 
-//MARK: Controlador de la lógica de las funcionalidades de Usuario
+//MARK: Controlador de la lógica de las funcionalidades de Restaurante
 struct RestaurantController: RouteCollection {
     
     //Método boot en el que se incluyen las rutas de las funcionalidades
     func boot(routes: any RoutesBuilder) throws {
         let restaurantRoutes = routes.grouped("restaurants")
+        let protected = restaurantRoutes.grouped(UserAuthenticator())
         restaurantRoutes.post("register", use: restaurantRegister)
-        restaurantRoutes.post("nearby", use: getNearbyRestaurants)
-        restaurantRoutes.get("all", use: getAllRestaurants)
+        protected.post("nearby", use: getNearbyRestaurants)
+        protected.get("all", use: getAllRestaurants)
+        protected.get(":id", use: getRestaurantDetails)
+        protected.get("me", use: getMyRestaurant)
+        protected.put("me", use: updateMyRestaurant)
     }
     
     //Método para registrar restaurante en la BBDD
@@ -104,6 +108,105 @@ struct RestaurantController: RouteCollection {
     //Método para que podamos comprobar todos los restaurantes
     func getAllRestaurants(req: Request) async throws -> [Restaurant] {
         try await Restaurant.query(on: req.db).all()
+    }
+    
+    func getRestaurantDetails(req: Request) async throws -> RestaurantDetailDTO {
+        //Extraemos el ID del path
+        guard let restaurantID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Missing or invalid restaurant ID.")
+        }
+        
+        //Buscamos el restaurante y cargamos sus platos relacionados
+        guard let restaurant = try await Restaurant
+            .query(on: req.db)
+            .filter(\.$id == restaurantID)
+            .with(\.$meals)
+            .first()
+        else {
+            throw Abort(.notFound, reason: "Restaurant not found.")
+        }
+        
+        //Creamos el DTO y lo devolvemos
+        return restaurant.toDetailDTO(meals: restaurant.meals)
+    }
+    
+    //Método para que se vea el detalle de restaurante propiedad del usuario restaurante en la pantalla de edición
+    func getMyRestaurant(req: Request) async throws -> Restaurant {
+        //Verificamos que hay un usuario autenticado
+        guard let user = req.auth.get(User.self) else {
+            throw Abort(.unauthorized, reason: "User not authenticated.")
+        }
+        
+        //Verificamos que el usuario es un restaurante
+        guard user.role == .restaurant else {
+            throw Abort(.forbidden, reason: "Only restaurants can access this route.")
+        }
+        
+        //Obtenemos el restaurante vinculado a este usuario
+        guard let restaurant = try await user.$restaurant.get(on: req.db) else {
+            throw Abort(.notFound, reason: "Restaurant not found for this user.")
+        }
+        
+        return restaurant
+    }
+    
+    //Método para editar la información del restaurante del usuario
+    func updateMyRestaurant(req: Request) async throws -> Restaurant {
+        //Verifica que hay un usuario autenticado
+        guard let user = req.auth.get(User.self) else {
+            throw Abort(.unauthorized, reason: "User not authenticated.")
+        }
+
+        //Verifica que es un restaurante
+        guard user.role == .restaurant else {
+            throw Abort(.forbidden, reason: "Only restaurants can update their data.")
+        }
+
+        //Busca el restaurante asociado a ese usuario
+        guard let restaurant = try await user.$restaurant.get(on: req.db) else {
+            throw Abort(.notFound, reason: "Restaurant not found for this user.")
+        }
+
+        //Decodifica los nuevos datos
+        let data = try req.content.decode(RestaurantUpdateDTO.self)
+
+        //Actualiza los campos del restaurante si hubiese cambios
+        if let name = data.name {
+            restaurant.name = name
+        }
+        if let info = data.info {
+            restaurant.info = info
+        }
+        if let address = data.address {
+            restaurant.address = address
+        }
+        if let country = data.country {
+            restaurant.country = country
+        }
+        if let city = data.city {
+            restaurant.city = city
+        }
+        if let zipCode = data.zipCode {
+            restaurant.zipCode = zipCode
+        }
+        if let lat = data.latitude {
+            restaurant.latitude = lat
+        }
+        if let lon = data.longitude {
+            restaurant.longitude = lon
+        }
+
+        //Si se ha enviado una nueva imagen, la actualizamos
+        if let image = try? req.content.get(File.self, at: "photo") {
+            let newPhotoURL = try await req.saveImageAndReturnURL(from: "photo")
+            restaurant.photo = newPhotoURL
+        }
+
+        //Guardamos los cambios
+        try await restaurant.save(on: req.db)
+
+        //Devolvemos el restaurante actualizado
+        return restaurant
     }
 }
 

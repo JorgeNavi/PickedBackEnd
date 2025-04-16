@@ -43,7 +43,7 @@ struct UserController: RouteCollection {
             let payload = UserTokenPayload(
                 userID: try user.requireID(),
                 role: user.role,
-                exp: .init(value: .now.addingTimeInterval(60 * 60 * 24)) // 24h
+                exp: .init(value: .now.addingTimeInterval(60 * 60 * 24 * 30)) //30 días
             )
 
             //firma del token (requerido) con payload

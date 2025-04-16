@@ -40,6 +40,9 @@ final class Meal: Model, Content, @unchecked Sendable {
     @Field(key: "food_type")
     var type: FoodType
     
+    @Parent(key: "restaurant_id")
+    var restaurant: Restaurant
+    
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     
@@ -52,17 +55,16 @@ final class Meal: Model, Content, @unchecked Sendable {
     @OptionalParent(key: "updated_by")
     var editor: User?
     
-    @Parent(key: "restaurant_id")
-    var restaurant: Restaurant
-    
     init() {}
 
-    init(id: UUID? = nil, name: String, info: String, photo: String, price: Float, restaurantID: UUID) {
+    init(id: UUID? = nil, name: String, info: String, photo: String, price: Float, units: Int, type: FoodType, restaurantID: UUID) {
         self.id = id
         self.name = name
         self.info = info
         self.photo = photo
         self.price = price
+        self.units = units
+        self.type = type
         self.$restaurant.id = restaurantID
     }
 }
