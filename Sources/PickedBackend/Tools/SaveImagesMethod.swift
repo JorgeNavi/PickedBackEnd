@@ -28,9 +28,12 @@ extension Request {
 
         //Nos aseguramos de que la carpeta existe
         try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
+        
+        // Convertimos ByteBuffer a Data
+        let data = imagePart.data.getData(at: imagePart.data.readerIndex, length: imagePart.data.readableBytes) ?? Data()
 
         //Guardamos el archivo en el disco
-        try await self.fileio.writeFile(.init(data: imagePart.data), at: fullPath)
+        try await self.fileio.writeFile(.init(data: data), at: fullPath)
 
         //Devolvemos la URL pública (asumiendo que el folder "Public" está expuesto por Vapor)
         return "/restaurant_photos/\(filename)"

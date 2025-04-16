@@ -22,6 +22,8 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "vapor_database",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
+    
+    app.routes.defaultMaxBodySize = "10mb"
 
     //La orden de llevar a cabo las migraciones a la BBDD y que se creen las tablas
     app.migrations.add(CreateUser())
@@ -34,3 +36,5 @@ public func configure(_ app: Application) async throws {
     //register routes
     try routes(app)
 }
+
+// /restaurant_photos/2F24404A-6BCF-4A7D-923C-F67FF03FE50C.png

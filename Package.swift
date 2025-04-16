@@ -36,6 +36,7 @@ let package = Package(
                  "Migrations",
                  "Models",
                  "Auth",
+                 "Tools",
                  "routes.swift",
                  "configure.swift",
                  "entrypoint.swift"

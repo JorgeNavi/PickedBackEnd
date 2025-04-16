@@ -11,7 +11,6 @@ struct RestaurantRegisterDTO: Content {
     //Datos del restaurante
     let restaurantName: String
     let info: String
-    let photo: String
     let address: String
     let country: String
     let city: String
