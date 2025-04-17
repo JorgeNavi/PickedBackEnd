@@ -16,3 +16,12 @@ struct MealRestaurantDTO: Content {
     let price: Float
     let photo: String
 }
+
+//MARK: DTO para la edición de meal
+struct MealUpdateDTO: Content {
+    let name: String?
+    let info: String?
+    let price: Float?
+    let units: Int?
+    let type: FoodType?
+}

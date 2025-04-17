@@ -1,10 +1,11 @@
 import Vapor
 import Fluent
 
-// MARK: Método que guarda una imagen recibida en formato multipart/form-data, valida su tipo, la guarda en disco y devuelve su URL pública como String
 extension Request {
     
+    // MARK: Método que guarda una imagen recibida en formato multipart/form-data, valida su tipo, la guarda en disco y devuelve su URL pública como String
     func saveImageAndReturnURL(from field: String) async throws -> String {
+        
         //Extraemos el archivo del campo indicado (ej: "photo")
         guard let imagePart = try? self.content.get(File.self, at: field) else {
             throw Abort(.badRequest, reason: "Missing image file in field '\(field)'")
@@ -37,5 +38,26 @@ extension Request {
 
         //Devolvemos la URL pública (asumiendo que el folder "Public" está expuesto por Vapor)
         return "/restaurant_photos/\(filename)"
+    }
+    
+    // MARK: Método que se encarga de comprobar que el usuario está registrad, que tiene rol de restaurante y recibe el restaurante vinculado
+    func authenticatedRestaurant() async throws -> Restaurant {
+        
+        //Verificamos que el usuario esté autenticado
+        guard let user = self.auth.get(User.self) else {
+            throw Abort(.unauthorized, reason: "User not authenticated.")
+        }
+
+        //Verificamos que el usuario tiene rol de restaurante
+        guard user.role == .restaurant else {
+            throw Abort(.forbidden, reason: "Only restaurants can access this resource.")
+        }
+
+        //Obtenemos el restaurante vinculado a este usuario
+        guard let restaurant = try await user.$restaurant.get(on: self.db) else {
+            throw Abort(.notFound, reason: "Restaurant not found for this user.")
+        }
+
+        return restaurant
     }
 }

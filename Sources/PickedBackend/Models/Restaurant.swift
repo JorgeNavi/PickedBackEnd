@@ -92,3 +92,33 @@ extension Restaurant {
         )
     }
 }
+
+//MARK: Método que aplica los updates a restaurant para dejar el metodo del controller más limpio
+extension Restaurant {
+    func applyUpdate(from dto: RestaurantUpdateDTO) {
+        if let name = dto.name {
+            self.name = name
+        }
+        if let info = dto.info {
+            self.info = info
+        }
+        if let address = dto.address {
+            self.address = address
+        }
+        if let country = dto.country {
+            self.country = country
+        }
+        if let city = dto.city {
+            self.city = city
+        }
+        if let zipCode = dto.zipCode {
+            self.zipCode = zipCode
+        }
+        if let lat = dto.latitude {
+            self.latitude = lat
+        }
+        if let lon = dto.longitude {
+            self.longitude = lon
+        }
+    }
+}

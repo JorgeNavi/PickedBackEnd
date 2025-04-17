@@ -68,3 +68,24 @@ final class Meal: Model, Content, @unchecked Sendable {
         self.$restaurant.id = restaurantID
     }
 }
+
+//MARK: Método que aplica los updates a meal para dejar el metodo del controller más limpio
+extension Meal {
+    func applyUpdate(from dto: MealUpdateDTO) {
+        if let name = dto.name {
+            self.name = name
+        }
+        if let info = dto.info {
+            self.info = info
+        }
+        if let price = dto.price {
+            self.price = price
+        }
+        if let units = dto.units {
+            self.units = units
+        }
+        if let type = dto.type {
+            self.type = type
+        }
+    }
+}

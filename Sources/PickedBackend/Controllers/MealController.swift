@@ -9,24 +9,15 @@ struct MealController: RouteCollection {
         let mealRoutes = routes.grouped("meals")
         mealRoutes.post("create", use: createMeal)
         mealRoutes.get(":id", use: getMealDetail)
+        mealRoutes.put("edit", ":id", use: updateMeal)
+        mealRoutes.delete("delete", ":id", use: deleteMeal)
     }
     
     //Método para registrar restaurante en la BBDD
     func createMeal(req: Request) async throws -> Meal {
-        //Verificamos que el usuario esté autenticado
-        guard let user = req.auth.get(User.self) else {
-            throw Abort(.unauthorized, reason: "User not authenticated.")
-        }
         
-        //Verificamos que el usuario tiene rol de restaurante
-        guard user.role == .restaurant else {
-            throw Abort(.forbidden, reason: "Only restaurants can create meals.")
-        }
-        
-        //Obtenemos el restaurante vinculado a este usuario
-        guard let restaurant = try await user.$restaurant.get(on: req.db) else {
-            throw Abort(.notFound, reason: "Restaurant not found for this user.")
-        }
+        //Obtenemos el restaurante que tiene el plato
+        let restaurant = try await req.authenticatedRestaurant()
 
         //Decodificamos el DTO con los datos del nuevo plato
         let data = try req.content.decode(MealDTO.self)
@@ -72,5 +63,71 @@ struct MealController: RouteCollection {
             units: meal.units,
             type: meal.type
         )
+    }
+    
+    // Método para editar un plato del restaurante autenticado
+    func updateMeal(req: Request) async throws -> Meal {
+
+        //Obtenemos el restaurante que tiene el plato
+        let restaurant = try await req.authenticatedRestaurant()
+
+        //Obtenemos el ID del plato a editar
+        guard let mealID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing meal ID.")
+        }
+
+        //Buscamos el plato y comprobamos que pertenece a este restaurante
+        guard let meal = try await Meal
+            .query(on: req.db)
+            .filter(\.$id == mealID)
+            .filter(\.$restaurant.$id == restaurant.requireID())
+            .first()
+        else {
+            throw Abort(.notFound, reason: "Meal not found or does not belong to your restaurant.")
+        }
+
+        //Decodificamos los nuevos datos opcionales
+        let updateData = try req.content.decode(MealUpdateDTO.self)
+        
+        //Aplicamos el método de actualización de los campos de meal
+        meal.applyUpdate(from: updateData)
+
+        //Verificamos si se ha enviado una nueva imagen
+        if (try? req.content.get(File.self, at: "photo")) != nil {
+            let newPhotoURL = try await req.saveImageAndReturnURL(from: "photo")
+            meal.photo = newPhotoURL
+        }
+
+        //Guardamos los cambios
+        try await meal.save(on: req.db)
+
+        return meal
+    }
+    
+    //Método para eliminar un plato del restaurante autenticado
+    func deleteMeal(req: Request) async throws -> HTTPStatus {
+        
+        //Obtenemos el restaurante que tiene el plato
+        let restaurant = try await req.authenticatedRestaurant()
+
+        //Obtenemos el ID del plato a eliminar
+        guard let mealID = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Invalid or missing meal ID.")
+        }
+
+        //Buscamos el plato y comprobamos que pertenece a este restaurante
+        guard let meal = try await Meal
+            .query(on: req.db)
+            .filter(\.$id == mealID)
+            .filter(\.$restaurant.$id == restaurant.requireID())
+            .first()
+        else {
+            throw Abort(.notFound, reason: "Meal not found or does not belong to your restaurant.")
+        }
+
+        //Eliminamos el plato
+        try await meal.delete(on: req.db)
+
+        return .noContent
     }
 }

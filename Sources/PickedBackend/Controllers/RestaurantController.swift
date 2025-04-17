@@ -85,6 +85,7 @@ struct RestaurantController: RouteCollection {
     
     //Método para ver los restaurantes en la zona del consumidor
     func getNearbyRestaurants(req: Request) async throws -> [Restaurant] {
+        
         //Decodificamos la localización del consumidor desde el JSON
         let location = try req.content.decode(LocationDTO.self)
         
@@ -105,7 +106,7 @@ struct RestaurantController: RouteCollection {
         return nearbyRestaurants
     }
     
-    //Método para que podamos comprobar todos los restaurantes
+    //Método para que podamos recibir todos los restaurantes
     func getAllRestaurants(req: Request) async throws -> [Restaurant] {
         try await Restaurant.query(on: req.db).all()
     }
@@ -132,72 +133,27 @@ struct RestaurantController: RouteCollection {
     
     //Método para que se vea el detalle de restaurante propiedad del usuario restaurante en la pantalla de edición
     func getMyRestaurant(req: Request) async throws -> Restaurant {
-        //Verificamos que hay un usuario autenticado
-        guard let user = req.auth.get(User.self) else {
-            throw Abort(.unauthorized, reason: "User not authenticated.")
-        }
-        
-        //Verificamos que el usuario es un restaurante
-        guard user.role == .restaurant else {
-            throw Abort(.forbidden, reason: "Only restaurants can access this route.")
-        }
-        
-        //Obtenemos el restaurante vinculado a este usuario
-        guard let restaurant = try await user.$restaurant.get(on: req.db) else {
-            throw Abort(.notFound, reason: "Restaurant not found for this user.")
-        }
-        
+
+        //Obtenemos el restaurante del usuario
+        let restaurant = try await req.authenticatedRestaurant()
         return restaurant
     }
     
     //Método para editar la información del restaurante del usuario
     func updateMyRestaurant(req: Request) async throws -> Restaurant {
-        //Verifica que hay un usuario autenticado
-        guard let user = req.auth.get(User.self) else {
-            throw Abort(.unauthorized, reason: "User not authenticated.")
-        }
-
-        //Verifica que es un restaurante
-        guard user.role == .restaurant else {
-            throw Abort(.forbidden, reason: "Only restaurants can update their data.")
-        }
-
-        //Busca el restaurante asociado a ese usuario
-        guard let restaurant = try await user.$restaurant.get(on: req.db) else {
-            throw Abort(.notFound, reason: "Restaurant not found for this user.")
-        }
+        
+        //Obtenemos el restaurante del usuario
+        let restaurant = try await req.authenticatedRestaurant()
 
         //Decodifica los nuevos datos
-        let data = try req.content.decode(RestaurantUpdateDTO.self)
+        let updateData = try req.content.decode(RestaurantUpdateDTO.self)
 
-        //Actualiza los campos del restaurante si hubiese cambios
-        if let name = data.name {
-            restaurant.name = name
-        }
-        if let info = data.info {
-            restaurant.info = info
-        }
-        if let address = data.address {
-            restaurant.address = address
-        }
-        if let country = data.country {
-            restaurant.country = country
-        }
-        if let city = data.city {
-            restaurant.city = city
-        }
-        if let zipCode = data.zipCode {
-            restaurant.zipCode = zipCode
-        }
-        if let lat = data.latitude {
-            restaurant.latitude = lat
-        }
-        if let lon = data.longitude {
-            restaurant.longitude = lon
-        }
+        //Aplicamos el método de actualización de los campos de restaurant
+        restaurant.applyUpdate(from: updateData)
+
 
         //Si se ha enviado una nueva imagen, la actualizamos
-        if let image = try? req.content.get(File.self, at: "photo") {
+        if (try? req.content.get(File.self, at: "photo")) != nil {
             let newPhotoURL = try await req.saveImageAndReturnURL(from: "photo")
             restaurant.photo = newPhotoURL
         }
@@ -210,7 +166,7 @@ struct RestaurantController: RouteCollection {
     }
 }
 
-//Método Haversine para filtrar la distancia del consumidor con 10km de radio para recibir restaurantes
+//MARK: Método Haversine para filtrar la distancia del consumidor con 10km de radio para recibir restaurantes
 func haversineDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {
     let earthRadius = 6371.0
     let dLat = (lat2 - lat1) * .pi / 180

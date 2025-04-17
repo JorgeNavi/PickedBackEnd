@@ -36,6 +36,8 @@ public func configure(_ app: Application) async throws {
     try await app.autoMigrate()
     //register routes
     try routes(app)
+    
+    //Llamamos al limpiador de platos con más de 24 horas de antigüedad
+    MealCleanUp.start(on: app)
 }
 
-// /restaurant_photos/2F24404A-6BCF-4A7D-923C-F67FF03FE50C.png
