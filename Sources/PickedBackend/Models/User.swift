@@ -48,3 +48,29 @@ final class User: Model, Content, Authenticatable, @unchecked Sendable {
         self.role = role
     }
 }
+
+//MARK: Transformador del modelo User a DTO de respuesta
+extension User {
+    func toLoginResponseDTO(token: String) throws -> UserLoginResponseDTO {
+        return try UserLoginResponseDTO(
+            id: requireID(),
+            name: name,
+            email: email,
+            role: role,
+            token: token
+        )
+    }
+    
+    //MARK: Método que aplica los updates a user para dejar el metodo del controller más limpio
+    func applyUpdate(from dto: UserUpdateDTO) throws {
+        if let name = dto.name {
+            self.name = name
+        }
+        if let email = dto.email {
+            self.email = email
+        }
+        if let password = dto.password {
+            self.password = try Bcrypt.hash(password)
+        }
+    }
+}

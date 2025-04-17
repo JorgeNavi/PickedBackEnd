@@ -150,6 +150,9 @@ struct RestaurantController: RouteCollection {
 
         //Aplicamos el método de actualización de los campos de restaurant
         restaurant.applyUpdate(from: updateData)
+        
+        //Informamos del id de quien a editado el restaurante (auditoría)
+        restaurant.$editor.id = try req.authenticatedUserID()
 
 
         //Si se ha enviado una nueva imagen, la actualizamos

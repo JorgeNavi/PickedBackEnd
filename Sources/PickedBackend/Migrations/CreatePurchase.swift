@@ -10,6 +10,8 @@ struct CreatePurchase: AsyncMigration {
             .field("quantity", .int, .required)
             .field("is_canceled", .bool, .required, .sql(.default(false)))
             .field("created_at", .date)
+            .field("created_by", .uuid, .references("users", "id"))
+            .field("updated_by", .uuid, .references("users", "id"))
             .create()
     }
 

@@ -24,6 +24,12 @@ final class Purchase: Model, Content, @unchecked Sendable {
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     
+    @OptionalParent(key: "created_by")
+    var creator: User?
+    
+    @OptionalParent(key: "updated_by")
+    var editor: User?
+    
     init() {}
     
     init(id: UUID? = nil, consumerID: UUID, mealID: UUID, quantity: Int, isCanceled: Bool = false) {

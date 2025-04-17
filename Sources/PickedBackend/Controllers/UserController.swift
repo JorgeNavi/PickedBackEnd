@@ -7,8 +7,11 @@ struct UserController: RouteCollection {
     //Método boot en el que se incluyen las rutas de las funcionalidades
     func boot(routes: any RoutesBuilder) throws {
         let userRoutes = routes.grouped("auth")
+        let protected = userRoutes.grouped(UserAuthenticator())
         userRoutes.post("register-consumer", use: consumerRegister)
         userRoutes.post("login", use: login)
+        protected.put("me", use: updateMyProfile)
+        protected.delete("me", use: deleteMyAccount)
     }
 
     //Método que se llama al hacer registro
@@ -91,5 +94,44 @@ struct UserController: RouteCollection {
 
         //Devolvemos los datos del usuario + el token como un DTO de respuesta
         return try user.toLoginResponseDTO(token: token)
+    }
+    
+    //Método para editar el perfil de usuario
+    func updateMyProfile(req: Request) async throws -> User {
+        
+        //Verificamos autenticación
+        let user = try req.authenticatedUser()
+
+        //Decodificamos los datos del formulario
+        let updateData = try req.content.decode(UserUpdateDTO.self)
+
+        //Aplicamos el método de actualización de los campos de restaurant
+        try user.applyUpdate(from: updateData)
+
+        //Guardamos los cambios
+        try await user.save(on: req.db)
+
+        //Devolvemos el usuario actualizado
+        return user
+    }
+    
+    //Método para eliminar usuario
+    func deleteMyAccount(req: Request) async throws -> HTTPStatus {
+        
+        //Verificamos autenticación
+        let user = try req.authenticatedUser()
+
+        //Si el usuario es restaurante, buscamos y eliminamos su restaurante
+        if user.role == .restaurant {
+            if let restaurant = try await user.$restaurant.get(on: req.db) {
+                try await restaurant.delete(on: req.db)
+            }
+        }
+
+        //Eliminamos al usuario
+        try await user.delete(on: req.db)
+
+        //Devolvemos 204 No Content
+        return .noContent
     }
 }

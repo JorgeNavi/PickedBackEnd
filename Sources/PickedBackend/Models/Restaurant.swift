@@ -42,9 +42,6 @@ final class Restaurant: Model, Content, @unchecked Sendable {
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
     
-    @OptionalParent(key: "created_by")
-    var creator: User?
-    
     @OptionalParent(key: "updated_by")
     var editor: User?
     
@@ -71,8 +68,10 @@ final class Restaurant: Model, Content, @unchecked Sendable {
     }
 }
 
-//MARK: Extension de restaurante para el dto de detalle añadiendo los platos asignados
+
 extension Restaurant {
+    
+    //MARK: Método para el dto de detalle añadiendo los platos asignados
     func toDetailDTO(meals: [Meal]) -> RestaurantDetailDTO {
         let mealDTOs = meals.map { meal in
             MealRestaurantDTO(id: meal.id!, name: meal.name, price: meal.price, photo: meal.photo)
@@ -91,10 +90,8 @@ extension Restaurant {
             meals: mealDTOs
         )
     }
-}
-
-//MARK: Método que aplica los updates a restaurant para dejar el metodo del controller más limpio
-extension Restaurant {
+    
+    //MARK: Método que aplica los updates a restaurant para dejar el metodo del controller más limpio
     func applyUpdate(from dto: RestaurantUpdateDTO) {
         if let name = dto.name {
             self.name = name

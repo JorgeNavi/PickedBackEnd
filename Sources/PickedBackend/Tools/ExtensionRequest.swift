@@ -3,6 +3,20 @@ import Fluent
 
 extension Request {
     
+    // MARK: Método que gestiona la autenticación de usuario
+    func authenticatedUser() throws -> User {
+        guard let user = self.auth.get(User.self) else {
+            throw Abort(.unauthorized, reason: "User not authenticated.")
+        }
+        return user
+    }
+    
+    // MARK: Método que gestiona la autenticación de usuario y devuelve su ID
+    func authenticatedUserID() throws -> UUID {
+        let user = try self.authenticatedUser()
+        return try user.requireID()
+    }
+    
     // MARK: Método que guarda una imagen recibida en formato multipart/form-data, valida su tipo, la guarda en disco y devuelve su URL pública como String
     func saveImageAndReturnURL(from field: String) async throws -> String {
         

@@ -2,6 +2,7 @@
 import Fluent
 import Vapor
 
+//MARK: Enum con los distintos tipos de comida
 enum FoodType: String, Codable, Content {
     case american
     case asian
@@ -69,8 +70,8 @@ final class Meal: Model, Content, @unchecked Sendable {
     }
 }
 
-//MARK: Método que aplica los updates a meal para dejar el metodo del controller más limpio
 extension Meal {
+    //MARK: Método que aplica los updates a meal para dejar el metodo del controller más limpio
     func applyUpdate(from dto: MealUpdateDTO) {
         if let name = dto.name {
             self.name = name

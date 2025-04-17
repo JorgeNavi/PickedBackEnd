@@ -16,6 +16,7 @@ struct MealController: RouteCollection {
     //Método para registrar restaurante en la BBDD
     func createMeal(req: Request) async throws -> Meal {
         
+        
         //Obtenemos el restaurante que tiene el plato
         let restaurant = try await req.authenticatedRestaurant()
 
@@ -35,6 +36,9 @@ struct MealController: RouteCollection {
             type: data.type,
             restaurantID: try restaurant.requireID()
         )
+        
+        //Informamos del id de quien a creado el plato (auditoría)
+        meal.$creator.id = try req.authenticatedUserID()
 
         //Guardamos el plato en la BBDD
         try await meal.save(on: req.db)
@@ -91,6 +95,9 @@ struct MealController: RouteCollection {
         
         //Aplicamos el método de actualización de los campos de meal
         meal.applyUpdate(from: updateData)
+        
+        //Informamos del id de quien a editado el plato (auditoría)
+        meal.$editor.id = try req.authenticatedUserID()
 
         //Verificamos si se ha enviado una nueva imagen
         if (try? req.content.get(File.self, at: "photo")) != nil {
