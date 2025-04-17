@@ -3,24 +3,26 @@ import Fluent
 
 extension Request {
     
-    // MARK: Método que gestiona la autenticación de usuario
+    //MARK: Método que gestiona la autenticación de usuario
     func authenticatedUser() throws -> User {
+        
         guard let user = self.auth.get(User.self) else {
             throw Abort(.unauthorized, reason: "User not authenticated.")
         }
         return user
     }
     
-    // MARK: Método que gestiona la autenticación de usuario y devuelve su ID
+    //MARK: Método que gestiona la autenticación de usuario y devuelve su ID
     func authenticatedUserID() throws -> UUID {
+        
         let user = try self.authenticatedUser()
         return try user.requireID()
     }
     
-    // MARK: Método que guarda una imagen recibida en formato multipart/form-data, valida su tipo, la guarda en disco y devuelve su URL pública como String
+    //MARK: Método que guarda una imagen recibida en formato multipart/form-data, valida su tipo, la guarda en disco y devuelve su URL pública como String
     func saveImageAndReturnURL(from field: String) async throws -> String {
         
-        //Extraemos el archivo del campo indicado (ej: "photo")
+        //Extraemos el archivo del campo indicado
         guard let imagePart = try? self.content.get(File.self, at: field) else {
             throw Abort(.badRequest, reason: "Missing image file in field '\(field)'")
         }
@@ -44,23 +46,21 @@ extension Request {
         //Nos aseguramos de que la carpeta existe
         try FileManager.default.createDirectory(atPath: path, withIntermediateDirectories: true)
         
-        // Convertimos ByteBuffer a Data
+        //Convertimos ByteBuffer a Data
         let data = imagePart.data.getData(at: imagePart.data.readerIndex, length: imagePart.data.readableBytes) ?? Data()
 
         //Guardamos el archivo en el disco
         try await self.fileio.writeFile(.init(data: data), at: fullPath)
 
-        //Devolvemos la URL pública (asumiendo que el folder "Public" está expuesto por Vapor)
+        //Devolvemos la URL pública
         return "/restaurant_photos/\(filename)"
     }
     
-    // MARK: Método que se encarga de comprobar que el usuario está registrad, que tiene rol de restaurante y recibe el restaurante vinculado
+    //MARK: Método que se encarga de comprobar que el usuario está registrado, que tiene rol de restaurante y recibe el restaurante vinculado
     func authenticatedRestaurant() async throws -> Restaurant {
         
         //Verificamos que el usuario esté autenticado
-        guard let user = self.auth.get(User.self) else {
-            throw Abort(.unauthorized, reason: "User not authenticated.")
-        }
+        let user = try self.authenticatedUser()
 
         //Verificamos que el usuario tiene rol de restaurante
         guard user.role == .restaurant else {

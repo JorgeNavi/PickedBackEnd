@@ -5,7 +5,7 @@ import Fluent
 struct MealCleanUp {
     static func start(on app: Application) {
         
-        //establecemos un evento en bucle que se lanzará 5 segundos después de arrancar el servidor y se repite cada hora
+        //Establecemos un evento en bucle que se lanzará 5 segundos después de arrancar el servidor y se repite cada hora
         app.eventLoopGroup.next().scheduleRepeatedTask(initialDelay: .seconds(5), delay: .hours(1)) { task in
             //En ese bucle hacemos:
             Task {

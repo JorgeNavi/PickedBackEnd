@@ -111,8 +111,9 @@ struct RestaurantController: RouteCollection {
         try await Restaurant.query(on: req.db).all()
     }
     
+    //Método para recibir el detalle de restaurante
     func getRestaurantDetails(req: Request) async throws -> RestaurantDetailDTO {
-        //Extraemos el ID del path
+        //Extraemos el ID
         guard let restaurantID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Missing or invalid restaurant ID.")
         }
@@ -154,7 +155,6 @@ struct RestaurantController: RouteCollection {
         //Informamos del id de quien a editado el restaurante (auditoría)
         restaurant.$editor.id = try req.authenticatedUserID()
 
-
         //Si se ha enviado una nueva imagen, la actualizamos
         if (try? req.content.get(File.self, at: "photo")) != nil {
             let newPhotoURL = try await req.saveImageAndReturnURL(from: "photo")
@@ -164,7 +164,6 @@ struct RestaurantController: RouteCollection {
         //Guardamos los cambios
         try await restaurant.save(on: req.db)
 
-        //Devolvemos el restaurante actualizado
         return restaurant
     }
 }

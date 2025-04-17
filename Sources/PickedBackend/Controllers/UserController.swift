@@ -49,7 +49,7 @@ struct UserController: RouteCollection {
                 exp: .init(value: .now.addingTimeInterval(60 * 60 * 24 * 30)) //30 días
             )
 
-            //firma del token (requerido) con payload
+            //firma del token con payload
             let token = try req.jwt.sign(payload)
 
             return try user.toLoginResponseDTO(token: token)
@@ -118,7 +118,7 @@ struct UserController: RouteCollection {
     //Método para editar el perfil de usuario
     func deleteMyAccount(req: Request) async throws -> HTTPStatus {
         
-        //Autenticación
+        //Verificamos autenticación
         let user = try req.authenticatedUser()
 
         //Si el usuario es restaurante, buscamos y eliminamos su restaurante
@@ -133,7 +133,6 @@ struct UserController: RouteCollection {
         //Eliminamos al usuario
         try await user.delete(on: req.db)
 
-        //Devolvemos 204 No Content
         return .noContent
     }
 }

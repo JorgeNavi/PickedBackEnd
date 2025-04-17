@@ -13,7 +13,7 @@ struct MealController: RouteCollection {
         mealRoutes.delete("delete", ":id", use: deleteMeal)
     }
     
-    //Método para registrar restaurante en la BBDD
+    //Método para registrar plato en la BBDD
     func createMeal(req: Request) async throws -> Meal {
         
         
@@ -43,13 +43,13 @@ struct MealController: RouteCollection {
         //Guardamos el plato en la BBDD
         try await meal.save(on: req.db)
 
-        //Devolvemos el plato recién creado (puedes devolver un DTO si prefieres)
         return meal
     }
     
     //Método para obtener el detalle de un plato a partir de su ID
     func getMealDetail(req: Request) async throws -> MealDTO {
-        //Extraemos el ID del path
+        
+        //Extraemos el ID
         guard let mealID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Missing or invalid meal ID.")
         }
@@ -69,7 +69,7 @@ struct MealController: RouteCollection {
         )
     }
     
-    // Método para editar un plato del restaurante autenticado
+    //Método para editar un plato
     func updateMeal(req: Request) async throws -> Meal {
 
         //Obtenemos el restaurante que tiene el plato
@@ -90,7 +90,7 @@ struct MealController: RouteCollection {
             throw Abort(.notFound, reason: "Meal not found or does not belong to your restaurant.")
         }
 
-        //Decodificamos los nuevos datos opcionales
+        //Decodificamos los nuevos datos
         let updateData = try req.content.decode(MealUpdateDTO.self)
         
         //Aplicamos el método de actualización de los campos de meal
@@ -111,7 +111,7 @@ struct MealController: RouteCollection {
         return meal
     }
     
-    //Método para eliminar un plato del restaurante autenticado
+    //Método para eliminar un plato
     func deleteMeal(req: Request) async throws -> HTTPStatus {
         
         //Obtenemos el restaurante que tiene el plato
@@ -138,6 +138,7 @@ struct MealController: RouteCollection {
         //Eliminamos el plato
         try await meal.delete(on: req.db)
 
+        //Devolvemos que no hay contenido
         return .noContent
     }
 }
