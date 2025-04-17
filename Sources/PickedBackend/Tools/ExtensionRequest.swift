@@ -74,4 +74,12 @@ extension Request {
 
         return restaurant
     }
+    
+    // MARK: Método para eliminar las fotos de Meal y Restaurant cuando estos son eliminados
+    func deleteImageIfExists(at path: String) throws {
+           let fullPath = self.application.directory.workingDirectory + "Public" + path
+           if FileManager.default.fileExists(atPath: fullPath) {
+               try FileManager.default.removeItem(atPath: fullPath)
+           }
+       }
 }

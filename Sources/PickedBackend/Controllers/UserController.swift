@@ -115,15 +115,17 @@ struct UserController: RouteCollection {
         return user
     }
     
-    //Método para eliminar usuario
+    //Método para editar el perfil de usuario
     func deleteMyAccount(req: Request) async throws -> HTTPStatus {
         
-        //Verificamos autenticación
+        //Autenticación
         let user = try req.authenticatedUser()
 
         //Si el usuario es restaurante, buscamos y eliminamos su restaurante
         if user.role == .restaurant {
             if let restaurant = try await user.$restaurant.get(on: req.db) {
+                //Eliminamos la imagen del restaurante si existe
+                try req.deleteImageIfExists(at: restaurant.photo)
                 try await restaurant.delete(on: req.db)
             }
         }

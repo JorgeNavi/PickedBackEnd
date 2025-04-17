@@ -16,6 +16,7 @@ struct CreateRestaurant: AsyncMigration {
             .field("latitude", .double, .required)
             .field("created_at", .date)
             .field("updated_at", .date)
+            .field("updated_by", .uuid, .references("users", "id"))
             .field("user_id", .uuid, .required, .references("users", "id"))
             .create()
     }

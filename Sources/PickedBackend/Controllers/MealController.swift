@@ -131,6 +131,9 @@ struct MealController: RouteCollection {
         else {
             throw Abort(.notFound, reason: "Meal not found or does not belong to your restaurant.")
         }
+        
+        //Comprobamos si el plato tiene foto y la eliminamos
+        try req.deleteImageIfExists(at: meal.photo)
 
         //Eliminamos el plato
         try await meal.delete(on: req.db)
