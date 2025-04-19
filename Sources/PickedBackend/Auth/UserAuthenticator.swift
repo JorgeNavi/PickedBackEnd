@@ -18,21 +18,34 @@ struct UserAuthenticator: AsyncMiddleware {
             //Verificamos y decodificamos el JWT
             let payload = try request.jwt.verify(bearer.token, as: UserTokenPayload.self)
 
-            //Buscamos al usuario en la base de datos con el ID extraído del payload del token
+            //Buscamos el usuario
             guard let user = try await User.find(payload.userID, on: request.db) else {
-                //Si el usuario no existe, lanzamos otro 401
                 throw Abort(.unauthorized, reason: "User not found")
             }
 
-            //Si todo está bien, marcamos al usuario como autenticado en esta request
+            //Autenticamos
             request.auth.login(user)
 
-            //Continuamos con la ejecución normal de la petición
+            //Continuamos con la ejecución
             return try await next.respond(to: request)
 
-        } catch {
-            //Si falla la verificación del token (token inválido o expirado), lanzamos un 401
+        } catch let abort as any AbortError {
+            
+            //Captura y relanza errores genericos de abort
+            debugPrint("Abort error: \(abort.status.code) - \(abort.reason)")
+            throw abort
+            
+        } catch let jwtError as JWTError {
+            
+            //Captura errores de token inválido o caducado
+            debugPrint("JWT Error: \(jwtError)")
             throw Abort(.unauthorized, reason: "Invalid or expired token")
+            
+        } catch {
+            
+            //Cualquier otro error inesperado
+            debugPrint("unexpected", error)
+            throw Abort(.internalServerError, reason: "Unexpected error during authentication")
         }
     }
 }

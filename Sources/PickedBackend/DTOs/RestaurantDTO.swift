@@ -45,3 +45,11 @@ struct RestaurantUpdateDTO: Content {
     let latitude: Double?
     let longitude: Double?
 }
+
+//MARK: DTO para que el restaurante vea las compras realizadas a sus platos
+struct RestaurantPurchaseDTO: Content {
+    let mealName: String
+    let consumerName: String
+    let quantity: Int
+    let date: Date
+}

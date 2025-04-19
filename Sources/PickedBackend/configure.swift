@@ -11,7 +11,7 @@ public func configure(_ app: Application) async throws {
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     
     let jwtSecret = Environment.get("JWT_SECRET") ?? "super_default_dev_secret"
-    print(jwtSecret)
+    debugPrint(jwtSecret)
     app.jwt.signers.use(.hs256(key: jwtSecret))
 
     app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(

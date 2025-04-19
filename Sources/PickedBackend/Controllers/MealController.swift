@@ -16,7 +16,6 @@ struct MealController: RouteCollection {
     //Método para registrar plato en la BBDD
     func createMeal(req: Request) async throws -> Meal {
         
-        
         //Obtenemos el restaurante que tiene el plato
         let restaurant = try await req.authenticatedRestaurant()
 

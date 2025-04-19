@@ -75,6 +75,20 @@ extension Request {
         return restaurant
     }
     
+    //MARK: Método que se encarga de comprobar que el usuario está registrado y que tiene rol de consumidor
+    func authenticatedConsumer() async throws -> User {
+        
+        //Verificamos que el usuario esté autenticado
+        let user = try self.authenticatedUser()
+        
+        //Verificamos que el usuario tiene rol de consumidor
+        guard user.role == .consumer else {
+            throw Abort(.forbidden, reason: "Only consumers can access this resource.")
+        }
+        
+        return user
+    }
+    
     // MARK: Método para eliminar las fotos de Meal y Restaurant cuando estos son eliminados
     func deleteImageIfExists(at path: String) throws {
            let fullPath = self.application.directory.workingDirectory + "Public" + path

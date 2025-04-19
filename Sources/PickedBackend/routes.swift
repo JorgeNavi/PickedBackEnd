@@ -21,5 +21,8 @@ app.get { req async in
     
     let mealController = MealController()
     try protected.register(collection: mealController)
+    
+    let purchaseController = PurchaseController()
+    try protected.register(collection: purchaseController)
 
 }

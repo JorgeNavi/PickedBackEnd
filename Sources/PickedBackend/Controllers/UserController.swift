@@ -55,7 +55,7 @@ struct UserController: RouteCollection {
             return try user.toLoginResponseDTO(token: token)
             
         } catch {
-            print("Error: cannot register user: \(String(reflecting: error))")
+            debugPrint("Error: cannot register user: \(String(reflecting: error))")
             throw Abort(.internalServerError, reason: "Error trying to register user.")
         }
 
