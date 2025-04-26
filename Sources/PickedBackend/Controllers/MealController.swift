@@ -11,6 +11,7 @@ struct MealController: RouteCollection {
         mealRoutes.get(":id", use: getMealDetail)
         mealRoutes.put("edit", ":id", use: updateMeal)
         mealRoutes.delete("delete", ":id", use: deleteMeal)
+        mealRoutes.get("mine", use: getMyMeals)
     }
     
     //Método para registrar plato en la BBDD
@@ -139,5 +140,28 @@ struct MealController: RouteCollection {
 
         //Devolvemos que no hay contenido
         return .noContent
+    }
+    
+    func getMyMeals(req: Request) async throws -> [MealRestaurantDTO] {
+        
+        //Obtenemos el restaurante
+        let restaurant = try await req.authenticatedRestaurant()
+        
+        //Obtenemos todos los platos de ese restaurante
+        let meals = try await Meal
+            .query(on: req.db)
+            .filter(\.$restaurant.$id == restaurant.requireID())
+            .all()
+
+        //Mapeamos al DTO
+        return try meals.map { meal in
+            MealRestaurantDTO(
+                id: try meal.requireID(),
+                name: meal.name,
+                units: meal.units,
+                price: meal.price,
+                photo: meal.photo
+            )
+        }
     }
 }

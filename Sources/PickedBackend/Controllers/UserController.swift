@@ -42,11 +42,12 @@ struct UserController: RouteCollection {
             //se guarda el usuario en la BBDD
             try await user.save(on: req.db)
 
-            //Creación del token con payload y devolución del mismo directamente tras registrarse
+            //Generamos el payload del JWT
+            let expirationToken = TokenExpiration.thirtyDays
             let payload = UserTokenPayload(
                 userID: try user.requireID(),
                 role: user.role,
-                exp: .init(value: .now.addingTimeInterval(60 * 60 * 24 * 30)) //30 días
+                exp: .init(value: .now.addingTimeInterval(expirationToken))
             )
 
             //firma del token con payload
@@ -82,13 +83,13 @@ struct UserController: RouteCollection {
             throw Abort(.unauthorized, reason: "incorrect email or password. Try again.")
         }
 
-        //Creamos el payload del JWT con la info del usuario
+        //Generamos el payload del JWT
+        let expirationToken = TokenExpiration.thirtyDays
         let payload = UserTokenPayload(
             userID: try user.requireID(),
             role: user.role,
-            exp: .init(value: .now.addingTimeInterval(60 * 60 * 24))
+            exp: .init(value: .now.addingTimeInterval(expirationToken))
         )
-
         //Generamos el token firmando el payload con la clave secreta
         let token = try req.jwt.sign(payload)
 

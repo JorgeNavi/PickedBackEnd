@@ -6,7 +6,7 @@ struct CreatePurchase: AsyncMigration {
         try await database.schema(Purchase.schema)
             .id()
             .field("consumer_id", .uuid, .required, .references("users", "id"))
-            .field("meal_id", .uuid, .required, .references("meals", "id"))
+            .field("meal_id", .uuid, .required, .references("meals", "id", onDelete: .cascade))
             .field("quantity", .int, .required)
             .field("is_canceled", .bool, .required, .sql(.default(false)))
             .field("created_at", .date)

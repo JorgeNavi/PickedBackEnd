@@ -13,6 +13,7 @@ struct MealDTO: Content {
 struct MealRestaurantDTO: Content {
     let id: UUID
     let name: String
+    let units: Int
     let price: Float
     let photo: String
 }

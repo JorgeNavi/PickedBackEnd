@@ -25,7 +25,7 @@ struct MealCleanUp {
                     
                 //Capturamos posibles errores
                 } catch {
-                    app.logger.error("Meal cleanup failed: \(error)")
+                    app.logger.error("Meal cleanup failed: \(String(reflecting: error))")
                 }
             }
         }

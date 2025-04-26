@@ -74,7 +74,7 @@ extension Restaurant {
     //MARK: Método para el dto de detalle añadiendo los platos asignados
     func toDetailDTO(meals: [Meal]) -> RestaurantDetailDTO {
         let mealDTOs = meals.map { meal in
-            MealRestaurantDTO(id: meal.id!, name: meal.name, price: meal.price, photo: meal.photo)
+            MealRestaurantDTO(id: meal.id!, name: meal.name, units: meal.units, price: meal.price, photo: meal.photo)
         }
         return RestaurantDetailDTO(
             id: self.id!,

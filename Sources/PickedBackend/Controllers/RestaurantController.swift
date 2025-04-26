@@ -65,10 +65,11 @@ struct RestaurantController: RouteCollection {
             try await restaurant.save(on: req.db)
             
             //Generamos el payload del JWT
+            let expirationToken = TokenExpiration.thirtyDays
             let payload = UserTokenPayload(
                 userID: try user.requireID(),
                 role: user.role,
-                exp: .init(value: .now.addingTimeInterval(60 * 60 * 24)) // 24h
+                exp: .init(value: .now.addingTimeInterval(expirationToken))
             )
             
             //Firmamos el token
